@@ -1,0 +1,7 @@
+npm ERR! code EAI_AGAIN
+npm ERR! syscall getaddrinfo
+npm ERR! errno EAI_AGAIN
+npm ERR! request to https://registry.npmjs.org/cors failed, reason: getaddrinfo EAI_AGAIN registry.npmjs.org
+
+npm ERR! Log files were not written due to an error writing to the directory: /home/user/.npm/_logs
+npm ERR! You can rerun the command with `--loglevel=verbose` to see the logs in your terminal
