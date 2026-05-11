@@ -45,9 +45,27 @@ export const fetchWalletBalance = async () => {
     }
 };
 
-export const depositToWallet = async (amount) => {
+export const depositToWallet = async (amount, referenceId) => {
     try {
-        const response = await api.post('/wallet/deposit', { amount });
+        const response = await api.post('/wallet/deposit', { amount, referenceId });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};
+
+export const withdrawFromWallet = async (amount, walletAddress) => {
+    try {
+        const response = await api.post('/wallet/withdraw', { amount, walletAddress });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};
+
+export const fetchWalletHistory = async () => {
+    try {
+        const response = await api.get('/wallet/history');
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;

@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Game from './pages/Game';
 import History from './pages/History';
+import Wallet from './pages/Wallet';
 import Navbar from './components/Navbar';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/game" element={<Game />} />
         <Route path="/history" element={<History />} />
+        <Route path="/wallet" element={<Wallet />} />
       </Routes>
     </Router>
   );

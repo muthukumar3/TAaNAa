@@ -1,21 +1,28 @@
 import Wallet from '../models/Wallet.js';
+import Transaction from '../models/Transaction.js';
+import WalletRequest from '../models/WalletRequest.js';
 
-export const depositWallet = async (req, res) => {
+export const requestDeposit = async (req, res) => {
     try {
-        const { amount } = req.body;
+        const { amount, referenceId } = req.body;
         const userId = req.user._id;
 
-        let wallet = await Wallet.findOne({ user: userId });
-        if (!wallet) {
-            wallet = new Wallet({ user: userId, balance: 0 });
-        }
+        const depositRequest = new WalletRequest({
+            user: userId,
+            type: 'deposit',
+            amount: Number(amount),
+            referenceId,
+            status: 'pending'
+        });
 
-        wallet.balance += Number(amount);
-        await wallet.save();
+        await depositRequest.save();
 
-        res.status(200).json({ message: 'Deposit successful', balance: wallet.balance });
+        res.status(200).json({ 
+            message: 'Deposit request submitted successfully. It will be processed soon.', 
+            request: depositRequest 
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Deposit failed', error: error.message });
+        res.status(500).json({ message: 'Deposit request failed', error: error.message });
     }
 };
 
@@ -34,9 +41,9 @@ export const getWalletBalance = async (req, res) => {
     }
 };
 
-export const withdrawRequest = async (req, res) => {
+export const requestWithdraw = async (req, res) => {
     try {
-        const { amount } = req.body;
+        const { amount, walletAddress } = req.body;
         const userId = req.user._id;
 
         const wallet = await Wallet.findOne({ user: userId });
@@ -44,11 +51,43 @@ export const withdrawRequest = async (req, res) => {
             return res.status(400).json({ message: 'Insufficient balance' });
         }
 
-        wallet.balance -= Number(amount);
-        await wallet.save();
+        const withdrawReq = new WalletRequest({
+            user: userId,
+            type: 'withdraw',
+            amount: Number(amount),
+            walletAddress,
+            status: 'pending'
+        });
 
-        res.status(200).json({ message: 'Withdrawal successful', balance: wallet.balance });
+        await withdrawReq.save();
+
+        // Optionally deduct balance here or when "processing"
+        // For now, let's keep it in balance until admin approves, 
+        // but maybe we should "lock" it? 
+        // User just asked to save the request.
+
+        res.status(200).json({ 
+            message: 'Withdrawal request sent successfully', 
+            request: withdrawReq 
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Withdrawal failed', error: error.message });
+        res.status(500).json({ message: 'Withdrawal request failed', error: error.message });
+    }
+};
+
+export const getWalletHistory = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        // Fetch all requests for this user (both deposit and withdraw)
+        const requests = await WalletRequest.find({ user: userId }).sort({ createdAt: -1 });
+        // Fetch confirmed transactions
+        const transactions = await Transaction.find({ user: userId }).sort({ createdAt: -1 });
+
+        res.status(200).json({ 
+            requests, 
+            history: transactions 
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch history', error: error.message });
     }
 };
